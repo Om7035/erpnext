@@ -530,7 +530,17 @@ def get_accounting_entries(
 		query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
-		query = query.force_index("posting_date_company_index")
+		
+		# Add limit and optimization for large datasets
+		# Only force index if we have a reasonable date range to avoid full table scans
+		max_entries = frappe.get_single_value("Accounts Settings", "max_gl_entries_in_report") or 50000
+		if from_date and (getdate(to_date) - getdate(from_date)).days <= 365:
+			query = query.force_index("posting_date_company_index")
+		else:
+			# For larger date ranges, use a more optimized approach
+			query = query.orderby(gl_entry.posting_date, order=frappe.qb.Order.desc)
+			if max_entries > 0:
+				query = query.limit(max_entries)
 
 		if ignore_opening_entries and not ignore_is_opening:
 			query = query.where(gl_entry.is_opening == "No")

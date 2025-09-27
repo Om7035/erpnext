@@ -89,6 +89,8 @@
   "general_ledger_remarks_length",
   "column_break_lvjk",
   "receivable_payable_remarks_length",
+  "report_performance_section",
+  "max_gl_entries_in_report",
   "accounts_receivable_payable_tuning_section",
   "receivable_payable_fetch_method",
   "column_break_ntmi",
@@ -651,6 +653,18 @@
    "fieldname": "fetch_valuation_rate_for_internal_transaction",
    "fieldtype": "Check",
    "label": "Fetch Valuation Rate for Internal Transaction"
+  },
+  {
+   "fieldname": "report_performance_section",
+   "fieldtype": "Section Break",
+   "label": "Report Performance Settings"
+  },
+  {
+   "default": "50000",
+   "description": "Maximum number of GL entries to fetch in account reports. Set to 0 for no limit.",
+   "fieldname": "max_gl_entries_in_report",
+   "fieldtype": "Int",
+   "label": "Max GL Entries in Reports"
   }
  ],
  "grid_page_length": 50,

@@ -178,6 +178,14 @@ def get_gl_entries(filters, accounting_dimensions):
 	if filters.get("categorize_by") == "Categorize by Account":
 		order_by_statement = "order by account, posting_date, creation"
 
+	# Add limit for performance optimization
+	# Check if date range is reasonable, otherwise limit results
+	date_range_days = (getdate(filters.to_date) - getdate(filters.from_date)).days
+	limit_clause = ""
+	max_entries = frappe.get_single_value("Accounts Settings", "max_gl_entries_in_report") or 50000
+	if date_range_days > 365 and max_entries > 0:
+		limit_clause = f"LIMIT {max_entries}"
+
 	if filters.get("include_default_book_entries"):
 		filters["company_fb"] = frappe.get_cached_value(
 			"Company", filters.get("company"), "default_finance_book"
@@ -204,6 +212,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		from `tabGL Entry`
 		where company=%(company)s {get_conditions(filters)}
 		{order_by_statement}
+		{limit_clause}
 	""",
 		filters,
 		as_dict=1,
